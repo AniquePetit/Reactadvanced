@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 const AddEventPage = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -7,14 +8,31 @@ const AddEventPage = () => {
   const [endTime, setEndTime] = useState("");
   const [image, setImage] = useState("");
   const [categories, setCategories] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [imageError, setImageError] = useState(""); // New state for image URL error
   const navigate = useNavigate();
+
   const handleAddEvent = (e) => {
     e.preventDefault();
-    // Validatie van het formulier
+    
+    // Reset errors before validation
+    setErrorMessage("");
+    setImageError("");
+
+    // Form validation
     if (!title || !startTime || !endTime) {
-      alert("Titel, starttijd en eindtijd zijn verplicht.");
+      setErrorMessage("Title, start time, and end time are required.");
       return;
     }
+    if (new Date(startTime) >= new Date(endTime)) {
+      setErrorMessage("End time must be later than start time.");
+      return;
+    }
+    if (image && !isValidImageUrl(image)) {
+      setImageError("The image URL is invalid.");
+      return;
+    }
+
     const newEvent = {
       title,
       description,
@@ -22,9 +40,10 @@ const AddEventPage = () => {
       endTime,
       image,
       categories,
-      creator: { name: "Admin", image: "default.png" }, // Voeg default creator toe
+      creator: { name: "Admin", image: "default.png" },
     };
-    // Verzend het nieuwe evenement naar de back-end
+
+    // Send new event to the backend
     fetch("http://localhost:3000/events", {
       method: "POST",
       headers: {
@@ -34,17 +53,33 @@ const AddEventPage = () => {
     })
       .then((res) => res.json())
       .then(() => {
-        navigate("/"); // Na het toevoegen van het evenement, ga terug naar de evenementenlijst
+        navigate("/"); // Navigate back to the events list after adding
+        // Reset form fields after successful submission
+        setTitle("");
+        setDescription("");
+        setStartTime("");
+        setEndTime("");
+        setImage("");
+        setCategories([]);
       })
       .catch((error) => {
-        console.error("Er is een fout opgetreden bij het toevoegen van het evenement:", error);
-        alert("Er is iets misgegaan bij het toevoegen van het evenement.");
+        console.error("An error occurred while adding the event:", error);
+        setErrorMessage("Something went wrong while adding the event.");
       });
   };
+
+  // Function to validate image URL format
+  const isValidImageUrl = (url) => {
+    return /^https?:\/\/.+\.(jpg|jpeg|png|gif|bmp|svg)$/i.test(url);
+  };
+
   return (
     <div>
       <h1>Add New Event</h1>
       <form onSubmit={handleAddEvent}>
+        {errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
+        {imageError && <div style={{ color: "red" }}>{imageError}</div>} {/* Image URL error */}
+
         <div>
           <label>Title:</label>
           <input
@@ -54,6 +89,7 @@ const AddEventPage = () => {
             required
           />
         </div>
+
         <div>
           <label>Description:</label>
           <textarea
@@ -61,6 +97,7 @@ const AddEventPage = () => {
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
+
         <div>
           <label>Start Time:</label>
           <input
@@ -70,6 +107,7 @@ const AddEventPage = () => {
             required
           />
         </div>
+
         <div>
           <label>End Time:</label>
           <input
@@ -79,6 +117,7 @@ const AddEventPage = () => {
             required
           />
         </div>
+
         <div>
           <label>Image URL:</label>
           <input
@@ -87,6 +126,7 @@ const AddEventPage = () => {
             onChange={(e) => setImage(e.target.value)}
           />
         </div>
+
         <div>
           <label>Categories (comma separated):</label>
           <input
@@ -95,9 +135,11 @@ const AddEventPage = () => {
             onChange={(e) => setCategories(e.target.value.split(",").map(cat => cat.trim()))}
           />
         </div>
+
         <button type="submit">Add Event</button>
       </form>
     </div>
   );
 };
+
 export default AddEventPage;
