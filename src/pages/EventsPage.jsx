@@ -23,20 +23,22 @@ const EventsPage = () => {
         setFilteredEvents(data);
       })
       .catch((err) => setError(err.message));
-  }, []);
+  }, []);  // Lege afhankelijkheden, dus dit wordt één keer uitgevoerd bij het laden
 
   // Haal alle unieke categorieën uit de evenementen
   const categories = [...new Set(events.flatMap(event => event.categories))];
 
   // Filter de evenementen op basis van zoekopdracht en geselecteerde categorie
+  useEffect(() => {
+    filterEvents(search, selectedCategory);
+  }, [events, search, selectedCategory]);  // Filter opnieuw wanneer events, search of selectedCategory veranderen
+
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
-    filterEvents(e.target.value, selectedCategory);
   };
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
-    filterEvents(search, e.target.value);
   };
 
   const filterEvents = (search, category) => {
@@ -96,12 +98,11 @@ const EventsPage = () => {
                 objectFit="cover"
                 mb="4"
               />
-             <Text fontWeight="bold" mb="2">{event.title}</Text>
-<Text>{event.description}</Text>
-<Button as={Link} to={`/event/${event.id}`} colorScheme="teal" mt="4">
-  Meer details
-</Button>
-
+              <Text fontWeight="bold" mb="2">{event.title}</Text>
+              <Text>{event.description}</Text>
+              <Button as={Link} to={`/event/${event.id}`} colorScheme="teal" mt="4">
+                Meer details
+              </Button>
             </Box>
           ))
         )}
@@ -110,4 +111,4 @@ const EventsPage = () => {
   );
 };
 
-export default EventsPage;  
+export default EventsPage;
