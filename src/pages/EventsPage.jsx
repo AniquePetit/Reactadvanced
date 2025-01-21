@@ -10,14 +10,13 @@ const EventsPage = () => {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [allCategories, setAllCategories] = useState([]);  // Alle categorieën beschikbaar
 
-  // Haal evenementen en categorieën lokaal op
+  // Haal evenementen en categorieën op via API of server
   useEffect(() => {
     setLoading(true);
 
-    // Haal de categorieën lokaal op
-    fetch('./src/categories.json')  
+    // Haal de categorieën op via API of server
+    fetch('/api/categories')  // Aangepaste endpoint van jouw Express-server
       .then((response) => {
         if (!response.ok) {
           throw new Error('Fout bij het ophalen van categorieën');
@@ -26,13 +25,12 @@ const EventsPage = () => {
       })
       .then((data) => {
         setCategories(data);  
-        setAllCategories(data);  
       })
       .catch((err) => setError('Fout bij het ophalen van categorieën'))
       .finally(() => setLoading(false));
 
-    // Haal de evenementen lokaal op
-    fetch('./src/events.json')  
+    // Haal de evenementen op via API of server
+    fetch('/api/events')  // Aangepaste endpoint van jouw Express-server
       .then((response) => {
         if (!response.ok) {
           throw new Error('Er is iets mis gegaan bij het ophalen van evenementen');
@@ -48,23 +46,23 @@ const EventsPage = () => {
   }, []);
 
   useEffect(() => {
-    if (loading || categories.length === 0) return;
+    if (loading) return;
 
     let filtered = events.filter(event => {
       const matchesSearch = event.title.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = selectedCategory === '' || getCategoryNames(event.categoryIds, allCategories).includes(selectedCategory);
+      const matchesCategory = selectedCategory === '' || event.categoryIds.includes(parseInt(selectedCategory));
       return matchesSearch && matchesCategory;
     });
 
     setFilteredEvents(filtered);
-  }, [events, search, selectedCategory, loading, allCategories]);
+  }, [events, search, selectedCategory, loading]);
 
   // Verkrijg de categorie-namen door de IDs te matchen
-  const getCategoryNames = (categoryIds, allCategories) => {
+  const getCategoryNames = (categoryIds) => {
     return categoryIds
       ? categoryIds
           .map((categoryId) => {
-            const category = allCategories.find((cat) => cat.id === categoryId);
+            const category = categories.find((cat) => cat.id === categoryId);
             return category ? category.name : null;
           })
           .filter(Boolean)  // Verwijder null waarden
@@ -121,7 +119,7 @@ const EventsPage = () => {
               <Text fontWeight="bold" mb="2">{event.title}</Text>
               <Text>{event.description}</Text>
               <Text mt="2">
-                <strong>Categories:</strong> {getCategoryNames(event.categoryIds, allCategories).join(', ')} 
+                <strong>Categories:</strong> {getCategoryNames(event.categoryIds).join(', ')} 
               </Text>
               <Button as={Link} to={`/event/${event.id}`} colorScheme="teal" mt="4">
                 Meer details

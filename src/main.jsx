@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import { ChakraProvider, Spinner } from '@chakra-ui/react';  // Importeer de Spinner van Chakra UI
+import { ChakraProvider, Spinner } from '@chakra-ui/react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 // Dynamische import van de pagina's met lazy loading
@@ -17,13 +17,13 @@ import Root from './components/Root';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Root />, // Root component als basis voor de routes
+    element: <Root />,
     children: [
       { path: '/', element: <EventsPage /> },
       { path: '/event/:eventId', element: <EventPage /> },
       { path: '/edit-event/:eventId', element: <EditEventPage /> },
       { path: '/add-event', element: <AddEventPage /> },
-      { path: '*', element: <NotFoundPage /> }, // Fallback voor niet bestaande routes
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ]);
@@ -35,7 +35,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       {/* Suspense met Spinner als fallback voor dynamisch geladen pagina's */}
       <Suspense
         fallback={
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <Spinner size="xl" color="teal.500" />
           </div>
         }
