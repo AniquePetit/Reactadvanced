@@ -64,6 +64,17 @@ const EventPage = () => {
     return <Text>Geen evenement gevonden.</Text>;
   }
 
+  const getCategoryNames = (categoryIds) => {
+    return categoryIds
+      ? categoryIds
+          .map((categoryId) => {
+            const category = categories.find((cat) => cat.id === categoryId);
+            return category ? category.name : null;
+          })
+          .filter(Boolean)  // Verwijder null waarden
+      : [];
+  };
+
   const eventCategories = getCategoryNames(categories, allCategories);
 
   return (

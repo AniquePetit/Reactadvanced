@@ -5,18 +5,17 @@ import { Link } from 'react-router-dom';
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [categories, setCategories] = useState([]);  // Alleen geselecteerde categorieën
+  const [categories, setCategories] = useState([]);  
   const [selectedCategory, setSelectedCategory] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Haal evenementen en categorieën op via API of server
   useEffect(() => {
     setLoading(true);
 
     // Haal de categorieën op via API of server
-    fetch('/api/categories')  // Aangepaste endpoint van jouw Express-server
+    fetch('/api/categories')
       .then((response) => {
         if (!response.ok) {
           throw new Error('Fout bij het ophalen van categorieën');
@@ -30,7 +29,7 @@ const EventsPage = () => {
       .finally(() => setLoading(false));
 
     // Haal de evenementen op via API of server
-    fetch('/api/events')  // Aangepaste endpoint van jouw Express-server
+    fetch('/api/events')
       .then((response) => {
         if (!response.ok) {
           throw new Error('Er is iets mis gegaan bij het ophalen van evenementen');
@@ -57,7 +56,6 @@ const EventsPage = () => {
     setFilteredEvents(filtered);
   }, [events, search, selectedCategory, loading]);
 
-  // Verkrijg de categorie-namen door de IDs te matchen
   const getCategoryNames = (categoryIds) => {
     return categoryIds
       ? categoryIds
@@ -133,3 +131,4 @@ const EventsPage = () => {
 };
 
 export default EventsPage;
+``
