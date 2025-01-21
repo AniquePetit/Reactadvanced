@@ -1,163 +1,123 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Box, Button, Input, Textarea, FormControl, FormLabel } from "@chakra-ui/react";
+import React, { useState, useEffect } from 'react';
+import { Box, Button, FormControl, FormLabel, Input, Textarea, Select, useToast } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 
 const AddEventPage = () => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [categories, setCategories] = useState([]);  // Dit is de lijst van categorieën die we ophalen
+  const [selectedCategories, setSelectedCategories] = useState([]);  // Hier slaan we de geselecteerde categorie-IDs op
+  const toast = useToast();
   const navigate = useNavigate();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [image, setImage] = useState("");
-  const [categories, setCategories] = useState([]);
-  const [creator, setCreator] = useState("");  // Nieuw veld voor creator
-  const [errorMessage, setErrorMessage] = useState("");
 
-  // Functie om het formulier in te dienen
+  // Haal de categorieën op bij het laden van de pagina
+  useEffect(() => {
+    fetch('http://localhost:3000/categories')
+      .then((response) => response.json())
+      .then((data) => {
+        setCategories(data);  // Zet de opgehaalde categorieën in de state
+      })
+      .catch((error) => console.error("Fout bij het ophalen van categorieën", error));
+  }, []);
+
+  // Handle submit voor het toevoegen van een evenement
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validatie
-    if (!title || !startTime || !endTime || !creator) {
-      setErrorMessage("Titel, starttijd, eindtijd en creator zijn verplicht.");
+    // Validatie voor verplichte velden
+    if (!title || !description || !startTime || !endTime || selectedCategories.length === 0) {
+      toast({
+        title: 'Fout',
+        description: 'Alle velden zijn verplicht.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
       return;
     }
 
-    // Zet de tijden om naar Date objecten
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-
-    // Controleer of de eindtijd na de starttijd komt
-    if (end <= start) {
-      setErrorMessage("De eindtijd moet na de starttijd liggen.");
-      return;
-    }
-
-    // Het nieuwe evenement object
+    // Formulierdata verzenden naar de server
     const newEvent = {
       title,
       description,
       startTime,
       endTime,
-      image,
-      categories,
-      creator, // Voeg creator toe aan het evenement
+      categoryIds: selectedCategories, // Hier worden de geselecteerde categorie-IDs verstuurd
     };
 
-    // Stuur een POST-verzoek naar de backend om het evenement toe te voegen
-    fetch("http://localhost:3000/events", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+    fetch('http://localhost:3000/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newEvent),
     })
-      .then((response) => response.json())
-      .then(() => {
-        // Reset de velden na succesvolle toevoeging
-        resetForm();
-        navigate("/"); // Navigeer terug naar de evenementenlijst
-      })
-      .catch((error) => {
-        console.error("Fout bij het toevoegen van het evenement:", error);
-        setErrorMessage("Er is iets mis gegaan bij het toevoegen van het evenement.");
+    .then((response) => response.json())
+    .then(() => {
+      toast({
+        title: 'Evenement toegevoegd',
+        description: 'Het evenement is succesvol toegevoegd.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
       });
-  };
-
-  // Reset functie om het formulier opnieuw leeg te maken
-  const resetForm = () => {
-    setTitle("");
-    setDescription("");
-    setStartTime("");
-    setEndTime("");
-    setImage("");
-    setCategories([]);
-    setCreator("");  // Reset de creator
-    setErrorMessage("");  // Reset de foutmelding
+      navigate('/'); // Navigeren naar de evenementenlijst
+    })
+    .catch((err) => {
+      console.error("Fout bij het toevoegen van evenement", err);
+    });
   };
 
   return (
-    <Box p={5}>
-      <h1>Nieuw Evenement Toevoegen</h1>
-      {errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
+    <Box p={5} maxW="md" mx="auto">
+      <FormControl>
+        <FormLabel>Title</FormLabel>
+        <Input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Evenementtitel"
+        />
 
-      <form onSubmit={handleSubmit}>
-        <FormControl mb={4} isRequired>
-          <FormLabel>Titel</FormLabel>
-          <Input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Titel van het evenement"
-          />
-        </FormControl>
+        <FormLabel mt={4}>Description</FormLabel>
+        <Textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Evenementbeschrijving"
+        />
 
-        <FormControl mb={4}>
-          <FormLabel>Beschrijving</FormLabel>
-          <Textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Beschrijving van het evenement"
-          />
-        </FormControl>
+        <FormLabel mt={4}>Start Time</FormLabel>
+        <Input
+          type="datetime-local"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+        />
 
-        <FormControl mb={4} isRequired>
-          <FormLabel>Starttijd</FormLabel>
-          <Input
-            type="datetime-local"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-          />
-        </FormControl>
+        <FormLabel mt={4}>End Time</FormLabel>
+        <Input
+          type="datetime-local"
+          value={endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+        />
 
-        <FormControl mb={4} isRequired>
-          <FormLabel>Eindtijd</FormLabel>
-          <Input
-            type="datetime-local"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-          />
-        </FormControl>
+        <FormLabel mt={4}>Categories</FormLabel>
+        <Select
+          multiple
+          placeholder="Selecteer een of meerdere categorieën"
+          onChange={(e) => setSelectedCategories([...e.target.selectedOptions].map(option => option.value))}
+        >
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}> {/* Gebruik `category.id` i.p.v. `category._id` */}
+              {category.name}
+            </option>
+          ))}
+        </Select>
 
-        <FormControl mb={4}>
-          <FormLabel>Afbeelding URL</FormLabel>
-          <Input
-            type="text"
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-            placeholder="URL van de afbeelding"
-          />
-        </FormControl>
-
-        <FormControl mb={4}>
-          <FormLabel>Categorieën (gescheiden door komma)</FormLabel>
-          <Input
-            type="text"
-            value={categories}
-            onChange={(e) => setCategories(e.target.value.split(",").map((cat) => cat.trim()))}
-            placeholder="Categorieën"
-          />
-        </FormControl>
-
-        <FormControl mb={4} isRequired>
-          <FormLabel>Creator</FormLabel>
-          <Input
-            type="text"
-            value={creator}
-            onChange={(e) => setCreator(e.target.value)}
-            placeholder="Naam van de maker"
-          />
-        </FormControl>
-
-        <Button type="submit" colorScheme="teal" mt={4}>
+        <Button mt={4} colorScheme="teal" onClick={handleSubmit}>
           Voeg Evenement Toe
         </Button>
-        <Button type="button" colorScheme="gray" mt={4} ml={4} onClick={resetForm}>
-          Reset
-        </Button>
-      </form>
+      </FormControl>
     </Box>
   );
 };
 
-export default AddEventPage;  
+export default AddEventPage;

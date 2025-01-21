@@ -1,88 +1,106 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Text, Image, Select, Input } from '@chakra-ui/react';
+import { Box, Button, Input, Select, Spinner, Text, Image } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [error, setError] = useState(null);
-  const [search, setSearch] = useState('');
+  const [categories, setCategories] = useState([]);  // Alleen geselecteerde categorieën
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [allCategories, setAllCategories] = useState([]);  // Alle categorieën beschikbaar
 
-  // Haal evenementen op van de server
+  // Haal evenementen en categorieën lokaal op
   useEffect(() => {
-    fetch("http://localhost:3000/events")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Er is een probleem met het ophalen van de evenementen.");
+    setLoading(true);
+
+    // Haal de categorieën lokaal op
+    fetch('.\categories.json')  
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Fout bij het ophalen van categorieën');
         }
-        return res.json();
+        return response.json();
       })
       .then((data) => {
-        setEvents(data);
-        setFilteredEvents(data);
+        setCategories(data);  
+        setAllCategories(data);  
       })
-      .catch((err) => setError(err.message));
-  }, []);  // Lege afhankelijkheden, dus dit wordt één keer uitgevoerd bij het laden
+      .catch((err) => setError('Fout bij het ophalen van categorieën'))
+      .finally(() => setLoading(false));
 
-  // Haal alle unieke categorieën uit de evenementen
-  const categories = [...new Set(events.flatMap(event => event.categories))];
+    // Haal de evenementen lokaal op
+    fetch('.\events.json')  
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Er is iets mis gegaan bij het ophalen van evenementen');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setEvents(data);  
+        setFilteredEvents(data);  
+      })
+      .catch((err) => setError('Er is iets mis gegaan bij het ophalen van evenementen'))
+      .finally(() => setLoading(false));
+  }, []);
 
-  // Filter de evenementen op basis van zoekopdracht en geselecteerde categorie
   useEffect(() => {
-    filterEvents(search, selectedCategory);
-  }, [events, search, selectedCategory]);  // Filter opnieuw wanneer events, search of selectedCategory veranderen
+    if (loading || categories.length === 0) return;
 
-  const handleSearchChange = (e) => {
-    setSearch(e.target.value);
-  };
-
-  const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
-  };
-
-  const filterEvents = (search, category) => {
-    let filtered = events;
-
-    if (search) {
-      filtered = filtered.filter((event) => event.title.toLowerCase().includes(search.toLowerCase()));
-    }
-
-    if (category) {
-      filtered = filtered.filter((event) => event.categories.includes(category));
-    }
+    let filtered = events.filter(event => {
+      const matchesSearch = event.title.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = selectedCategory === '' || getCategoryNames(event.categoryIds, allCategories).includes(selectedCategory);
+      return matchesSearch && matchesCategory;
+    });
 
     setFilteredEvents(filtered);
+  }, [events, search, selectedCategory, loading, allCategories]);
+
+  // Verkrijg de categorie-namen door de IDs te matchen
+  const getCategoryNames = (categoryIds, allCategories) => {
+    return categoryIds
+      .map((categoryId) => {
+        const category = allCategories.find((cat) => cat.id === categoryId);
+        return category ? category.name : null;
+      })
+      .filter(Boolean);  // Verwijder null waarden
   };
 
-  if (error) {
-    return <div style={{ color: "red" }}>Fout: {error}</div>;
+  if (loading) {
+    return <Spinner size="xl" />;
   }
 
   return (
     <Box p="4">
-      <Text fontSize="2xl" mb="4">Evenementenlijst</Text>
+      {error && <Text color="red.500">{error}</Text>}
 
       {/* Zoekveld */}
       <Input
-        placeholder="Zoek evenement"
+        placeholder="Zoek evenementen"
         value={search}
-        onChange={handleSearchChange}
+        onChange={(e) => setSearch(e.target.value)}
         mb="4"
       />
 
-      {/* Filter categorieën */}
+      {/* Categorieën dropdown */}
       <Select
         placeholder="Selecteer een categorie"
         value={selectedCategory}
-        onChange={handleCategoryChange}
+        onChange={(e) => setSelectedCategory(e.target.value)}
         mb="4"
       >
-        {categories.map((category) => (
-          <option key={category} value={category}>
-            {category.charAt(0).toUpperCase() + category.slice(1)}
-          </option>
-        ))}
+        {categories.length > 0 ? (
+          categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))
+        ) : (
+          <option value="">Geen categorieën beschikbaar</option>
+        )}
       </Select>
 
       <Box display="grid" gridTemplateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap="4">
@@ -92,7 +110,7 @@ const EventsPage = () => {
           filteredEvents.map((event) => (
             <Box key={event.id} p="4" borderWidth="1px" borderRadius="lg">
               <Image
-                src={event.image || "default-image-url.jpg"} // Fallback image
+                src={event.image || '/images/default-placeholder.jpg'}  
                 alt={event.title}
                 boxSize="200px"
                 objectFit="cover"
@@ -100,6 +118,9 @@ const EventsPage = () => {
               />
               <Text fontWeight="bold" mb="2">{event.title}</Text>
               <Text>{event.description}</Text>
+              <Text mt="2">
+                <strong>Categories:</strong> {getCategoryNames(event.categoryIds, allCategories).join(', ')} 
+              </Text>
               <Button as={Link} to={`/event/${event.id}`} colorScheme="teal" mt="4">
                 Meer details
               </Button>

@@ -1,200 +1,139 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Box, Button, Input, Textarea, FormControl, FormLabel, useToast } from "@chakra-ui/react";
+import React, { useState, useEffect } from 'react';
+import { Box, Button, FormControl, FormLabel, Input, Textarea, Select, useToast } from '@chakra-ui/react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const EditEventPage = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [image, setImage] = useState("");
+  const [event, setEvent] = useState(null);
   const [categories, setCategories] = useState([]);
-  const [creator, setCreator] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [error, setError] = useState(null);
 
-  // Haal data van een bestaand evenement op als er een eventId is
+  // Haal evenementgegevens op bij het laden van de pagina
   useEffect(() => {
-    if (eventId) {
-      fetch(`http://localhost:3000/events/${eventId}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch event data.");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setTitle(data.title);
-          setDescription(data.description);
-          setStartTime(data.startTime);
-          setEndTime(data.endTime);
-          setImage(data.image);
-          setCategories(data.categories);
-          setCreator(typeof data.creator === "object" ? data.creator.name : data.creator);
-        })
-        .catch((error) => {
-          console.error("Error fetching event:", error);
-          setErrorMessage("Er is iets mis gegaan bij het ophalen van het evenement.");
-        });
-    }
+    // Haal de categorieën op
+    fetch('http://localhost:3000/categories')
+      .then((response) => response.json())
+      .then((data) => {
+        setCategories(data); // Zet de opgehaalde categorieën in de state
+      })
+      .catch((err) => setError('Fout bij het ophalen van categorieën'));
+
+    // Haal evenement op
+    fetch(`http://localhost:3000/events/${eventId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setEvent(data);
+        setTitle(data.title);
+        setDescription(data.description);
+        setStartTime(data.startTime);
+        setEndTime(data.endTime);
+        setSelectedCategories(data.categories); // Zet de geselecteerde categorie-IDs
+      })
+      .catch((err) => setError('Fout bij het ophalen van evenementgegevens'));
   }, [eventId]);
 
-  // Formulier indienen
+  // Formulier indienen voor het bijwerken van het evenement
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-
-    if (end <= start) {
-      setErrorMessage("De eindtijd moet na de starttijd liggen.");
+    if (!title || !description || !startTime || !endTime || selectedCategories.length === 0) {
+      setError('Alle velden zijn verplicht.');
       return;
     }
 
-    if (!title || !startTime || !endTime || !creator) {
-      setErrorMessage("Titel, starttijd, eindtijd en creator zijn verplicht.");
-      return;
-    }
-
-    const eventData = {
+    const updatedEvent = {
       title,
       description,
       startTime,
       endTime,
-      image,
-      categories,
-      creator,
+      categories: selectedCategories, // Stuur de geselecteerde categorieën (ID's)
     };
 
-    const url = eventId
-      ? `http://localhost:3000/events/${eventId}` // Update bestaand evenement
-      : "http://localhost:3000/events"; // Voeg nieuw evenement toe
-    const method = eventId ? "PUT" : "POST";
-
-    fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(eventData),
+    fetch(`http://localhost:3000/events/${eventId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedEvent),
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to save event data.");
+          throw new Error('Er is iets mis gegaan bij het bijwerken van het evenement.');
         }
         return response.json();
       })
       .then(() => {
         toast({
-          title: eventId ? "Evenement bijgewerkt" : "Nieuw evenement toegevoegd",
-          description: eventId ? "Het evenement is succesvol bijgewerkt." : "Het evenement is succesvol toegevoegd.",
+          title: "Evenement bijgewerkt.",
+          description: "Het evenement is succesvol bijgewerkt.",
           status: "success",
           duration: 3000,
           isClosable: true,
         });
-        navigate("/");
+        navigate(`/event/${eventId}`); // Navigeren naar de evenementpagina
       })
-      .catch((error) => {
-        console.error("Error saving event:", error);
-        setErrorMessage("Er is iets mis gegaan bij het opslaan van het evenement.");
+      .catch((err) => {
+        setError('Er is iets mis gegaan bij het bijwerken van het evenement');
       });
   };
 
-  // Reset formulier
-  const resetForm = () => {
-    setTitle("");
-    setDescription("");
-    setStartTime("");
-    setEndTime("");
-    setImage("");
-    setCategories([]);
-    setCreator("");
-    setErrorMessage("");
-  };
+  if (!event) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <Box p={5}>
-      <h1>{eventId ? "Evenement Bijwerken" : "Nieuw Evenement Toevoegen"}</h1>
-      {errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
+    <Box p={5} maxW="md" mx="auto">
+      <FormControl isInvalid={error}>
+        <FormLabel>Title</FormLabel>
+        <Input 
+          value={title} 
+          onChange={(e) => setTitle(e.target.value)} 
+          placeholder="Evenementtitel" 
+        />
+        <FormLabel mt={4}>Description</FormLabel>
+        <Textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Evenementbeschrijving"
+        />
+        <FormLabel mt={4}>Start Time</FormLabel>
+        <Input
+          type="datetime-local"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+        />
+        <FormLabel mt={4}>End Time</FormLabel>
+        <Input
+          type="datetime-local"
+          value={endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+        />
+        <FormLabel mt={4}>Categories</FormLabel>
+        <Select
+          multiple
+          value={selectedCategories}
+          onChange={(e) => setSelectedCategories([...e.target.selectedOptions].map(option => option.value))}
+        >
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}> {/* Gebruik `category.id` i.p.v. `category._id` */}
+              {category.name}
+            </option>
+          ))}
+        </Select>
 
-      <form onSubmit={handleSubmit}>
-        <FormControl mb={4} isRequired>
-          <FormLabel>Titel</FormLabel>
-          <Input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Titel van het evenement"
-          />
-        </FormControl>
+        {/* Foutmelding tonen */}
+        {error && <div>{error}</div>}
 
-        <FormControl mb={4}>
-          <FormLabel>Beschrijving</FormLabel>
-          <Textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Beschrijving van het evenement"
-          />
-        </FormControl>
-
-        <FormControl mb={4} isRequired>
-          <FormLabel>Starttijd</FormLabel>
-          <Input
-            type="datetime-local"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-          />
-        </FormControl>
-
-        <FormControl mb={4} isRequired>
-          <FormLabel>Eindtijd</FormLabel>
-          <Input
-            type="datetime-local"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-          />
-        </FormControl>
-
-        <FormControl mb={4}>
-          <FormLabel>Afbeelding URL</FormLabel>
-          <Input
-            type="text"
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-            placeholder="URL van de afbeelding"
-          />
-        </FormControl>
-
-        <FormControl mb={4}>
-          <FormLabel>Categorieën (gescheiden door komma)</FormLabel>
-          <Input
-            type="text"
-            value={categories.join(", ")}
-            onChange={(e) => setCategories(e.target.value.split(",").map((cat) => cat.trim()))}
-            placeholder="Categorieën"
-          />
-        </FormControl>
-
-        <FormControl mb={4} isRequired>
-          <FormLabel>Creator</FormLabel>
-          <Input
-            type="text"
-            value={creator}
-            onChange={(e) => setCreator(e.target.value)}
-            placeholder="Naam van de maker"
-          />
-        </FormControl>
-
-        <Button type="submit" colorScheme="teal" mt={4}>
-          {eventId ? "Sla Evenement Op" : "Voeg Evenement Toe"}
+        <Button mt={4} colorScheme="teal" onClick={handleSubmit}>
+          Update Evenement
         </Button>
-        <Button type="button" colorScheme="gray" mt={4} ml={4} onClick={resetForm}>
-          Reset
-        </Button>
-      </form>
+      </FormControl>
     </Box>
   );
 };
