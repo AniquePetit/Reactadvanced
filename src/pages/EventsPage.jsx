@@ -17,7 +17,7 @@ const EventsPage = () => {
     setLoading(true);
 
     // Haal de categorieën lokaal op
-    fetch('.\categories.json')  
+    fetch('./src/categories.json')  
       .then((response) => {
         if (!response.ok) {
           throw new Error('Fout bij het ophalen van categorieën');
@@ -32,7 +32,7 @@ const EventsPage = () => {
       .finally(() => setLoading(false));
 
     // Haal de evenementen lokaal op
-    fetch('.\events.json')  
+    fetch('./src/events.json')  
       .then((response) => {
         if (!response.ok) {
           throw new Error('Er is iets mis gegaan bij het ophalen van evenementen');
@@ -62,11 +62,13 @@ const EventsPage = () => {
   // Verkrijg de categorie-namen door de IDs te matchen
   const getCategoryNames = (categoryIds, allCategories) => {
     return categoryIds
-      .map((categoryId) => {
-        const category = allCategories.find((cat) => cat.id === categoryId);
-        return category ? category.name : null;
-      })
-      .filter(Boolean);  // Verwijder null waarden
+      ? categoryIds
+          .map((categoryId) => {
+            const category = allCategories.find((cat) => cat.id === categoryId);
+            return category ? category.name : null;
+          })
+          .filter(Boolean)  // Verwijder null waarden
+      : [];
   };
 
   if (loading) {
