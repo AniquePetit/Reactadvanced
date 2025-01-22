@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Input, Select, Spinner, Text, Image } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 
+const CustomButton = ({ to, colorScheme, children }) => {
+  return (
+    <Button as={Link} to={to} colorScheme={colorScheme} mt="4">
+      {children}
+    </Button>
+  );
+};
+
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
@@ -15,7 +23,7 @@ const EventsPage = () => {
     setLoading(true);
 
     // Haal de categorieën op via API of server
-    fetch('/api/categories')
+    fetch('http://localhost:3000/categories')
       .then((response) => {
         if (!response.ok) {
           throw new Error('Fout bij het ophalen van categorieën');
@@ -29,7 +37,7 @@ const EventsPage = () => {
       .finally(() => setLoading(false));
 
     // Haal de evenementen op via API of server
-    fetch('/api/events')
+    fetch('http://localhost:3000/events')
       .then((response) => {
         if (!response.ok) {
           throw new Error('Er is iets mis gegaan bij het ophalen van evenementen');
@@ -119,9 +127,9 @@ const EventsPage = () => {
               <Text mt="2">
                 <strong>Categories:</strong> {getCategoryNames(event.categoryIds).join(', ')} 
               </Text>
-              <Button as={Link} to={`/event/${event.id}`} colorScheme="teal" mt="4">
+              <CustomButton to={`/event/${event.id}`} colorScheme="teal">
                 Meer details
-              </Button>
+              </CustomButton>
             </Box>
           ))
         )}
@@ -131,4 +139,3 @@ const EventsPage = () => {
 };
 
 export default EventsPage;
-``

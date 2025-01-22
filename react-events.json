@@ -1,0 +1,63 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "Ignacio Doe",
+      "image": "https://global-uploads.webflow.com/5eecfecbe625d195e35b89f2/624bfb093da7d92733c001c0_Ignacio%20Villafruela%20Rodr%C3%ADguez.jpg"
+    },
+    {
+      "id": "2",
+      "name": "Jane Bennett",
+      "image": "https://global-uploads.webflow.com/5eecfecbe625d195e35b89f2/624bfb401d7131c760ca1c63_Elieska%20Lensink.jpg"
+    }
+  ],
+  "events": [
+    {
+      "id": "2",
+      "createdBy": 1,
+      "title": "Laser Tag mania",
+      "description": "Let's play laser tag!",
+      "image": "https://www.ctvnews.ca/polopoly_fs/1.5118552.1600965663!/httpImage/image.jpg_gen/derivatives/landscape_1020/image.jpg",
+      "categoryIds": [
+        2
+      ],
+      "location": "Blinded by the Lights Laser Tag, 15 Main St.",
+      "startTime": "2023-04-06T18:46",
+      "endTime": "2023-04-06T17:46"
+    },
+    {
+      "title": "test",
+      "description": "test",
+      "startTime": "2025-01-25T09:38",
+      "endTime": "2025-01-25T15:38",
+      "image": "",
+      "categories": [],
+      "creator": "blabla",
+      "id": "4"
+    },
+    {
+      "id": "84f6",
+      "title": "test",
+      "description": "test",
+      "startTime": "2025-01-23T08:28",
+      "endTime": "2025-01-23T11:28",
+      "categoryIds": [
+        "1"
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "name": "sports",
+      "id": "1"
+    },
+    {
+      "name": "games",
+      "id": "2"
+    },
+    {
+      "name": "relaxation",
+      "id": "3"
+    }
+  ]
+}

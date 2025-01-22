@@ -7,10 +7,14 @@ const AddEventPage = () => {
   const [description, setDescription] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [categories, setCategories] = useState([]);  // Dit is de lijst van categorieën die we ophalen
-  const [selectedCategories, setSelectedCategories] = useState([]);  // Hier slaan we de geselecteerde categorie-IDs op
+  const [categories, setCategories] = useState([]);  // De lijst van categorieën
+  const [selectedCategory, setSelectedCategory] = useState('');  // Geselecteerde categorie
+  const [image, setImage] = useState(null);  // Afbeeldingstate
   const toast = useToast();
   const navigate = useNavigate();
+
+  // Statische gebruiker (creatorId kan bijvoorbeeld altijd dezelfde waarde zijn)
+  const creatorId = 1;  // Hardcoded creator ID
 
   // Haal de categorieën op bij het laden van de pagina
   useEffect(() => {
@@ -22,12 +26,20 @@ const AddEventPage = () => {
       .catch((error) => console.error("Fout bij het ophalen van categorieën", error));
   }, []);
 
+  // Handle afbeelding upload
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(URL.createObjectURL(file));  // Voorbeeld hoe je de afbeelding kunt weergeven
+    }
+  };
+
   // Handle submit voor het toevoegen van een evenement
   const handleSubmit = (e) => {
     e.preventDefault();
 
     // Validatie voor verplichte velden
-    if (!title || !description || !startTime || !endTime || selectedCategories.length === 0) {
+    if (!title || !description || !startTime || !endTime || !selectedCategory) {
       toast({
         title: 'Fout',
         description: 'Alle velden zijn verplicht.',
@@ -44,7 +56,9 @@ const AddEventPage = () => {
       description,
       startTime,
       endTime,
-      categoryIds: selectedCategories, // Hier worden de geselecteerde categorie-IDs verstuurd
+      categoryId: parseInt(selectedCategory),  // Geselecteerde categorie ID
+      image: image,  // Afbeelding URL
+      createdBy: creatorId,  // Statische creator ID
     };
 
     fetch('http://localhost:3000/events', {
@@ -101,16 +115,21 @@ const AddEventPage = () => {
 
         <FormLabel mt={4}>Categories</FormLabel>
         <Select
-          multiple
-          placeholder="Selecteer een of meerdere categorieën"
-          onChange={(e) => setSelectedCategories([...e.target.selectedOptions].map(option => option.value))}
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          placeholder="Selecteer een categorie"
         >
           {categories.map((category) => (
-            <option key={category.id} value={category.id}> {/* Gebruik `category.id` i.p.v. `category._id` */}
+            <option key={category.id} value={category.id}>
               {category.name}
             </option>
           ))}
         </Select>
+
+        <FormLabel mt={4}>Afbeelding</FormLabel>
+        <Input type="file" onChange={handleImageChange} />
+
+        {image && <Box mt={2}><img src={image} alt="Geselecteerde afbeelding" style={{ width: '100%', height: 'auto' }} /></Box>}
 
         <Button mt={4} colorScheme="teal" onClick={handleSubmit}>
           Voeg Evenement Toe

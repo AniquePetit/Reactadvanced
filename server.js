@@ -13,6 +13,10 @@ app.use(express.json());
 // Helperfunctie om JSON-bestanden veilig te lezen
 const readJsonFile = (filePath) => {
   try {
+    const stats = fs.statSync(filePath);
+    if (!stats.isFile()) {
+      throw new Error('Not a valid file');
+    }
     const data = fs.readFileSync(filePath, 'utf-8');
     return JSON.parse(data);
   } catch (error) {
@@ -28,6 +32,24 @@ app.get('/api/events', (req, res) => {
 
   if (eventsData) {
     res.json(eventsData);
+  } else {
+    res.status(500).json({ error: 'Could not load events data.' });
+  }
+});
+
+// Route voor evenementen ophalen op basis van ID
+app.get('/api/events/:id', (req, res) => {
+  const { id } = req.params;
+  const filePath = path.join(__dirname, 'src', 'data', 'events.json');
+  const eventsData = readJsonFile(filePath);
+
+  if (eventsData) {
+    const event = eventsData.find(event => event.id === id);
+    if (event) {
+      res.json(event);
+    } else {
+      res.status(404).json({ error: 'Event not found' });
+    }
   } else {
     res.status(500).json({ error: 'Could not load events data.' });
   }

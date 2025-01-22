@@ -6,51 +6,60 @@ const EventPage = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
-  const [categories, setCategories] = useState([]);  
-  const [allCategories, setAllCategories] = useState([]);  
+  const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-    // Haal evenementgegevens op vanaf de backend server
-    fetch('http://localhost:5000/api/events')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Fout bij het ophalen van evenementgegevens');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        const foundEvent = data.find(e => e.id === parseInt(eventId));
-        if (foundEvent) {
-          setEvent(foundEvent);
-          setCategories(foundEvent.categoryIds);  
-        } else {
-          setError('Geen evenement gevonden met dit ID.');
-        }
-      })
-      .catch((err) => {
-        setError('Fout bij het ophalen van evenementgegevens');
-      });
+        const [eventsResponse, categoriesResponse] = await Promise.all([
+          fetch(`http://localhost:3000/events/${eventId}`),
+          fetch('http://localhost:3000/categories'),
+        ]);
 
-    // Haal alle categorieën op vanaf de backend server
-    fetch('http://localhost:5000/api/categories')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Fout bij het ophalen van categorieën');
+        if (!eventsResponse.ok || !categoriesResponse.ok) {
+          throw new Error('Fout bij het ophalen van gegevens');
         }
-        return response.json();
-      })
-      .then((data) => {
-        setAllCategories(data);  
-      })
-      .catch((err) => {
-        setError('Fout bij het ophalen van categorieën');
-      })
-      .finally(() => setLoading(false));
+
+        const [eventData, categoriesData] = await Promise.all([
+          eventsResponse.json(),
+          categoriesResponse.json(),
+        ]);
+
+        if (!eventData) {
+          throw new Error('Geen evenement gevonden met dit ID.');
+        }
+
+        setEvent(eventData);
+        setAllCategories(categoriesData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [eventId]);
+
+  const parseDate = (dateString) => {
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? 'Onbekende datum' : date.toLocaleString();
+  };
+
+  const getCategoryNames = (categoryIds) => {
+    if (!Array.isArray(categoryIds)) return ['Onbekend'];
+
+    return categoryIds
+      .map((categoryId) => {
+        const category = allCategories.find((cat) => cat.id === categoryId);
+        return category ? category.name : 'Onbekende categorie';
+      })
+      .filter(Boolean);
+  };
 
   if (loading) {
     return <Spinner size="xl" />;
@@ -61,41 +70,33 @@ const EventPage = () => {
   }
 
   if (!event) {
-    return <Text>Geen evenement gevonden.</Text>;
+    return <Text color="orange.500">Evenement niet gevonden. Controleer het ID en probeer het opnieuw.</Text>;
   }
 
-  const getCategoryNames = (categoryIds) => {
-    return categoryIds
-      ? categoryIds
-          .map((categoryId) => {
-            const category = categories.find((cat) => cat.id === categoryId);
-            return category ? category.name : null;
-          })
-          .filter(Boolean)  // Verwijder null waarden
-      : [];
-  };
-
-  const eventCategories = getCategoryNames(categories, allCategories);
+  const eventCategories = getCategoryNames(event.categoryIds);
 
   return (
     <Box p={5}>
       <Heading>{event.title}</Heading>
       <Text mb={2}>{event.description}</Text>
       <Text mb={2}>
-        <strong>Start Time:</strong> {new Date(event.startTime).toLocaleString()}
+        <strong>Start Time:</strong> {parseDate(event.startTime)}
       </Text>
       <Text mb={2}>
-        <strong>End Time:</strong> {new Date(event.endTime).toLocaleString()}
+        <strong>End Time:</strong> {parseDate(event.endTime)}
       </Text>
       <Image
-        src={event.image || '/images/default-placeholder.jpg'}  
-        alt={event.title}
+        src={event.image || '/images/default-placeholder.jpg'}
+        alt={event.title || 'Evenement afbeelding'}
         boxSize="300px"
         objectFit="cover"
         mb={4}
       />
       <Text mb={2}>
-        <strong>Categories:</strong> {eventCategories.join(', ')} 
+        <strong>Categories:</strong> {eventCategories.join(', ')}
+      </Text>
+      <Text mb={2}>
+        <strong>Creator:</strong> {event.creator}
       </Text>
       <Button colorScheme="blue" onClick={() => navigate(`/edit-event/${event.id}`)}>
         Bewerken
