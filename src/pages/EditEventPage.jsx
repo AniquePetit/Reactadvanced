@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Input, Textarea, FormControl, FormLabel, Spinner, useToast } from '@chakra-ui/react';
+import { Box, Button, Input, Textarea, FormControl, FormLabel, Spinner, Select, useToast } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const EditEventPage = () => {
@@ -12,35 +12,42 @@ const EditEventPage = () => {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [image, setImage] = useState('');
-  const [categories, setCategories] = useState([]);
+  const [category, setCategory] = useState(''); // Single category
+  const [allCategories, setAllCategories] = useState([]);
   const [creator, setCreator] = useState('');
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [event, setEvent] = useState(null);
 
+  // Fetch the event data and categories
   useEffect(() => {
     if (eventId) {
       setLoading(true);
 
-      fetch(`http://localhost:3000/events/${eventId}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('Fout bij het ophalen van evenement');
+      // Fetch the event and categories
+      Promise.all([
+        fetch(`http://localhost:3000/events/${eventId}`),
+        fetch('http://localhost:3000/categories')
+      ])
+        .then(([eventResponse, categoriesResponse]) => {
+          if (!eventResponse.ok || !categoriesResponse.ok) {
+            throw new Error('Fout bij het ophalen van evenement of categorieën');
           }
-          return response.json();
+          return Promise.all([eventResponse.json(), categoriesResponse.json()]);
         })
-        .then((data) => {
-          setEvent(data);
-          setTitle(data.title);
-          setDescription(data.description);
-          setStartTime(data.startTime);
-          setEndTime(data.endTime);
-          setImage(data.image || 'https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'); // Fallback URL voor afbeeldingen
-          setCategories(data.categories || []);
-          if (data.creator && typeof data.creator === "object") {
-            setCreator(data.creator.name);
+        .then(([eventData, categoriesData]) => {
+          setEvent(eventData);
+          setAllCategories(categoriesData); // Set all categories
+          setTitle(eventData.title);
+          setDescription(eventData.description);
+          setStartTime(eventData.startTime);
+          setEndTime(eventData.endTime);
+          setImage(eventData.image || 'https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg');
+          setCategory(eventData.category || ''); // Set the category for single selection
+          if (eventData.creator && typeof eventData.creator === "object") {
+            setCreator(eventData.creator.name);
           } else {
-            setCreator(data.creator);
+            setCreator(eventData.creator);
           }
         })
         .catch((error) => {
@@ -62,8 +69,8 @@ const EditEventPage = () => {
       return;
     }
 
-    if (!title || !startTime || !endTime || !creator) {
-      setErrorMessage('Titel, starttijd, eindtijd en creator zijn verplicht.');
+    if (!title || !startTime || !endTime || !creator || !category) {
+      setErrorMessage('Titel, starttijd, eindtijd, creator en categorie zijn verplicht.');
       return;
     }
 
@@ -73,7 +80,7 @@ const EditEventPage = () => {
       startTime,
       endTime,
       image,
-      categories,
+      category, // Send only a single category
       creator,
     };
 
@@ -112,7 +119,7 @@ const EditEventPage = () => {
     setStartTime('');
     setEndTime('');
     setImage('');
-    setCategories([]);
+    setCategory(''); // Reset single category
     setCreator('');
     setErrorMessage('');
   };
@@ -174,14 +181,19 @@ const EditEventPage = () => {
           />
         </FormControl>
 
-        <FormControl mb={4}>
-          <FormLabel>Categorieën (gescheiden door komma)</FormLabel>
-          <Input
-            type="text"
-            value={categories.join(', ')}
-            onChange={(e) => setCategories(e.target.value.split(',').map((cat) => cat.trim()))}
-            placeholder="Categorieën"
-          />
+        <FormControl mb={4} isRequired>
+          <FormLabel>Categorie</FormLabel>
+          <Select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="Selecteer een categorie"
+          >
+            {allCategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </Select>
         </FormControl>
 
         <FormControl mb={4} isRequired>

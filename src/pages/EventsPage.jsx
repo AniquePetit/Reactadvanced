@@ -120,7 +120,7 @@ const EventsPage = () => {
           filteredEvents.map((event) => (
             <Box key={event.id} p="4" borderWidth="1px" borderRadius="lg">
               <Image
-                src={event.image ? event.image : '/images/default-placeholder.jpg'}
+                src={event.image ? event.image : 'https://png.pngtree.com/png-vector/20210604/ourmid/pngtree-gray-network-placeholder-png-image_3416659.jpg'}
                 alt={event.title}
                 boxSize="200px"
                 objectFit="cover"

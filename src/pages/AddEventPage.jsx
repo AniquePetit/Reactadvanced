@@ -64,7 +64,7 @@ const AddEventPage = () => {
 
       const createdEvent = await response.json();
 
-      // Toon toast notificatie
+     
       toast({
         title: 'Evenement aangemaakt!',
         description: `Het evenement "${createdEvent.title}" is succesvol aangemaakt.`,
@@ -73,7 +73,7 @@ const AddEventPage = () => {
         isClosable: true,
       });
 
-      // Navigeer naar de event details pagina
+     
       navigate(`/event/${createdEvent.id}`);
     } catch (error) {
       toast({

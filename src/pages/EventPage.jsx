@@ -106,7 +106,7 @@ const EventPage = () => {
         <strong>End Time:</strong> {parseDate(event.endTime)}
       </Text>
       <Image
-        src={event.image ? event.image : '/images/default-placeholder.jpg'}
+        src={event.image ? event.image : 'https://png.pngtree.com/png-vector/20210604/ourmid/pngtree-gray-network-placeholder-png-image_3416659.jpg'}
         alt={event.title || 'Evenement afbeelding'}
         boxSize="300px"
         objectFit="cover"
