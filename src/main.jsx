@@ -3,17 +3,17 @@ import ReactDOM from 'react-dom/client';
 import { ChakraProvider, Spinner } from '@chakra-ui/react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-// Dynamische import van de pagina's met lazy loading
+
 const EventPage = React.lazy(() => import('./pages/EventPage'));
 const EventsPage = React.lazy(() => import('./pages/EventsPage'));
 const AddEventPage = React.lazy(() => import('./pages/AddEventPage'));
 const EditEventPage = React.lazy(() => import('./pages/EditEventPage'));
 const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage'));
 
-// Root component importeren voor de router
+
 import Root from './components/Root';
 
-// Definiëren van de router en routes
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -28,7 +28,7 @@ const router = createBrowserRouter([
   },
 ]);
 
-// Root element renderen met ChakraProvider en Suspense voor de pagina's
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ChakraProvider>

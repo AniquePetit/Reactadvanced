@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, FormControl, FormLabel, Input, Textarea, Select, useToast } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Input, Textarea, useToast } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 
 const AddEventPage = () => {
@@ -7,133 +7,162 @@ const AddEventPage = () => {
   const [description, setDescription] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [categories, setCategories] = useState([]);  
-  const [selectedCategory, setSelectedCategory] = useState(''); 
-  const [image, setImage] = useState(null); 
+  const [categoryIds, setCategoryIds] = useState([]);
+  const [image, setImage] = useState('');
+  const [categories, setCategories] = useState([]);
   const toast = useToast();
   const navigate = useNavigate();
 
-  
-  const creatorId = 1;  
-
- 
+  // Ophalen van categorieën bij het laden van de pagina
   useEffect(() => {
-    fetch('http://localhost:3000/categories')
-      .then((response) => response.json())
-      .then((data) => {
-        setCategories(data);  
-      })
-      .catch((error) => console.error("Fout bij het ophalen van categorieën", error));
-  }, []);
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/categories');
+        if (!response.ok) {
+          throw new Error('Fout bij het ophalen van categorieën');
+        }
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        toast({
+          title: 'Fout bij ophalen categorieën.',
+          description: error.message,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(URL.createObjectURL(file));  
-    }
-  };
+    fetchCategories();
+  }, [toast]);
 
- 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-  
-    if (!title || !description || !startTime || !endTime || !selectedCategory) {
-      toast({
-        title: 'Fout',
-        description: 'Alle velden zijn verplicht.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-   
     const newEvent = {
       title,
       description,
       startTime,
       endTime,
-      categoryId: parseInt(selectedCategory),  
-      image: image,  
-      createdBy: creatorId,  
+      categoryIds,
+      image,
     };
 
-    fetch('http://localhost:3000/events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newEvent),
-    })
-    .then((response) => response.json())
-    .then(() => {
+    try {
+      const response = await fetch('http://localhost:3000/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newEvent),
+      });
+
+      if (!response.ok) {
+        throw new Error('Er is een probleem opgetreden bij het aanmaken van het evenement.');
+      }
+
+      const createdEvent = await response.json();
+
+      // Toon toast notificatie
       toast({
-        title: 'Evenement toegevoegd',
-        description: 'Het evenement is succesvol toegevoegd.',
+        title: 'Evenement aangemaakt!',
+        description: `Het evenement "${createdEvent.title}" is succesvol aangemaakt.`,
         status: 'success',
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
-      navigate('/'); 
-    })
-    .catch((err) => {
-      console.error("Fout bij het toevoegen van evenement", err);
-    });
+
+      // Navigeer naar de event details pagina
+      navigate(`/event/${createdEvent.id}`);
+    } catch (error) {
+      toast({
+        title: 'Fout bij het aanmaken van evenement.',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   return (
-    <Box p={5} maxW="md" mx="auto">
-      <FormControl>
-        <FormLabel>Title</FormLabel>
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Evenementtitel"
-        />
+    <Box p="4">
+      <form onSubmit={handleSubmit}>
+        <FormControl mb="4">
+          <FormLabel>Title</FormLabel>
+          <Input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </FormControl>
 
-        <FormLabel mt={4}>Description</FormLabel>
-        <Textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Evenementbeschrijving"
-        />
+        <FormControl mb="4">
+          <FormLabel>Description</FormLabel>
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+        </FormControl>
 
-        <FormLabel mt={4}>Start Time</FormLabel>
-        <Input
-          type="datetime-local"
-          value={startTime}
-          onChange={(e) => setStartTime(e.target.value)}
-        />
+        <FormControl mb="4">
+          <FormLabel>Start Time</FormLabel>
+          <Input
+            type="datetime-local"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            required
+          />
+        </FormControl>
 
-        <FormLabel mt={4}>End Time</FormLabel>
-        <Input
-          type="datetime-local"
-          value={endTime}
-          onChange={(e) => setEndTime(e.target.value)}
-        />
+        <FormControl mb="4">
+          <FormLabel>End Time</FormLabel>
+          <Input
+            type="datetime-local"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            required
+          />
+        </FormControl>
 
-        <FormLabel mt={4}>Categories</FormLabel>
-        <Select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          placeholder="Selecteer een categorie"
-        >
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </Select>
+        <FormControl mb="4">
+          <FormLabel>Categories</FormLabel>
+          <select
+            multiple
+            value={categoryIds}
+            onChange={(e) =>
+              setCategoryIds(Array.from(e.target.selectedOptions, (option) => option.value))
+            }
+            required
+          >
+            {categories.length > 0 ? (
+              categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))
+            ) : (
+              <option value="">Geen categorieën beschikbaar</option>
+            )}
+          </select>
+        </FormControl>
 
-        <FormLabel mt={4}>Afbeelding</FormLabel>
-        <Input type="file" onChange={handleImageChange} />
+        <FormControl mb="4">
+          <FormLabel>Image URL</FormLabel>
+          <Input
+            type="text"
+            value={image}
+            onChange={(e) => setImage(e.target.value)}
+          />
+        </FormControl>
 
-        {image && <Box mt={2}><img src={image} alt="Geselecteerde afbeelding" style={{ width: '100%', height: 'auto' }} /></Box>}
-
-        <Button mt={4} colorScheme="teal" onClick={handleSubmit}>
-          Voeg Evenement Toe
+        <Button colorScheme="blue" type="submit">
+          Create Event
         </Button>
-      </FormControl>
+      </form>
     </Box>
   );
 };

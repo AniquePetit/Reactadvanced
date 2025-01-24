@@ -63,8 +63,7 @@ const EventPage = () => {
   };
 
   const handleDelete = () => {
-    // We open de modal voor bevestiging
-    setIsModalOpen(true);
+    setIsModalOpen(true); // Open the confirmation modal
   };
 
   const confirmDelete = async () => {
@@ -72,7 +71,7 @@ const EventPage = () => {
       await fetch(`http://localhost:3000/events/${event.id}`, {
         method: 'DELETE',
       });
-      navigate('/');
+      navigate('/'); // Redirect to the main events page after deleting
     } catch (err) {
       console.error('Error bij verwijderen:', err);
     }

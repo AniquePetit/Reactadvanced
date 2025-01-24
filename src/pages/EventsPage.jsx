@@ -22,7 +22,6 @@ const EventsPage = () => {
   useEffect(() => {
     setLoading(true);
 
-    // Haal de categorieën op via API of server
     fetch('http://localhost:3000/categories')
       .then((response) => {
         if (!response.ok) {
@@ -36,7 +35,6 @@ const EventsPage = () => {
       .catch((err) => setError('Fout bij het ophalen van categorieën'))
       .finally(() => setLoading(false));
 
-    // Haal de evenementen op via API of server
     fetch('http://localhost:3000/events')
       .then((response) => {
         if (!response.ok) {

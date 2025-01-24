@@ -36,16 +36,6 @@
       "id": "4"
     },
     {
-      "id": "84f6",
-      "title": "test",
-      "description": "test",
-      "startTime": "2025-01-23T08:28",
-      "endTime": "2025-01-23T11:28",
-      "categoryIds": [
-        "1"
-      ]
-    },
-    {
       "id": "0c99",
       "title": "griots",
       "description": "festival",
@@ -56,16 +46,6 @@
       "createdBy": 1
     },
     {
-      "title": "test",
-      "description": "test",
-      "startTime": "2025-01-31T10:44",
-      "endTime": "2025-02-01T10:44",
-      "image": "https://via.placeholder.com/300",
-      "categories": [],
-      "creator": "test",
-      "id": "dd68"
-    },
-    {
       "id": "25c5",
       "title": "test",
       "description": "test",
@@ -74,6 +54,17 @@
       "categoryId": 2,
       "image": null,
       "createdBy": 1
+    },
+    {
+      "id": "0e8a",
+      "title": "test",
+      "description": "test",
+      "startTime": "2025-12-10T10:00",
+      "endTime": "2025-12-10T11:00",
+      "categoryIds": [
+        "3"
+      ],
+      "image": "https://via.placeholder.com/300"
     }
   ],
   "categories": [
@@ -88,6 +79,14 @@
     {
       "name": "relaxation",
       "id": "3"
+    },
+    {
+      "name": "art",
+      "id": "4"
+    },
+    {
+      "name": "music",
+      "id": "5"
     }
   ]
 }
