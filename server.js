@@ -6,11 +6,11 @@ import path from 'path';
 const app = express();
 const PORT = 5000;
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 
-// Helperfunctie om JSON-bestanden veilig te lezen
+
 const readJsonFile = (filePath) => {
   try {
     const stats = fs.statSync(filePath);
@@ -25,7 +25,7 @@ const readJsonFile = (filePath) => {
   }
 };
 
-// Route voor evenementen ophalen
+
 app.get('/api/events', (req, res) => {
   const filePath = path.join(__dirname, 'src', 'data', 'events.json');
   const eventsData = readJsonFile(filePath);
@@ -37,7 +37,7 @@ app.get('/api/events', (req, res) => {
   }
 });
 
-// Route voor evenementen ophalen op basis van ID
+
 app.get('/api/events/:id', (req, res) => {
   const { id } = req.params;
   const filePath = path.join(__dirname, 'src', 'data', 'events.json');
@@ -55,7 +55,7 @@ app.get('/api/events/:id', (req, res) => {
   }
 });
 
-// Route voor categorieën ophalen
+
 app.get('/api/categories', (req, res) => {
   const filePath = path.join(__dirname, 'src', 'data', 'categories.json');
   const categoriesData = readJsonFile(filePath);
@@ -67,7 +67,7 @@ app.get('/api/categories', (req, res) => {
   }
 });
 
-// Start server
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -22,14 +22,7 @@ const Navigation = () => {
           }>
             Add Event
           </Button>
-          <Button 
-            as={Link} 
-            to="/" 
-            color="black" 
-            _hover={{ bg: 'teal.700' }}
-          >
-            Events
-          </Button>
+        
         </Flex>
       </Flex>
     </Box>

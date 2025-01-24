@@ -7,38 +7,37 @@ const AddEventPage = () => {
   const [description, setDescription] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [categories, setCategories] = useState([]);  // De lijst van categorieën
-  const [selectedCategory, setSelectedCategory] = useState('');  // Geselecteerde categorie
-  const [image, setImage] = useState(null);  // Afbeeldingstate
+  const [categories, setCategories] = useState([]);  
+  const [selectedCategory, setSelectedCategory] = useState(''); 
+  const [image, setImage] = useState(null); 
   const toast = useToast();
   const navigate = useNavigate();
 
-  // Statische gebruiker (creatorId kan bijvoorbeeld altijd dezelfde waarde zijn)
-  const creatorId = 1;  // Hardcoded creator ID
+  
+  const creatorId = 1;  
 
-  // Haal de categorieën op bij het laden van de pagina
+ 
   useEffect(() => {
     fetch('http://localhost:3000/categories')
       .then((response) => response.json())
       .then((data) => {
-        setCategories(data);  // Zet de opgehaalde categorieën in de state
+        setCategories(data);  
       })
       .catch((error) => console.error("Fout bij het ophalen van categorieën", error));
   }, []);
 
-  // Handle afbeelding upload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file));  // Voorbeeld hoe je de afbeelding kunt weergeven
+      setImage(URL.createObjectURL(file));  
     }
   };
 
-  // Handle submit voor het toevoegen van een evenement
+ 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validatie voor verplichte velden
+  
     if (!title || !description || !startTime || !endTime || !selectedCategory) {
       toast({
         title: 'Fout',
@@ -50,15 +49,15 @@ const AddEventPage = () => {
       return;
     }
 
-    // Formulierdata verzenden naar de server
+   
     const newEvent = {
       title,
       description,
       startTime,
       endTime,
-      categoryId: parseInt(selectedCategory),  // Geselecteerde categorie ID
-      image: image,  // Afbeelding URL
-      createdBy: creatorId,  // Statische creator ID
+      categoryId: parseInt(selectedCategory),  
+      image: image,  
+      createdBy: creatorId,  
     };
 
     fetch('http://localhost:3000/events', {
@@ -75,7 +74,7 @@ const AddEventPage = () => {
         duration: 3000,
         isClosable: true,
       });
-      navigate('/'); // Navigeren naar de evenementenlijst
+      navigate('/'); 
     })
     .catch((err) => {
       console.error("Fout bij het toevoegen van evenement", err);

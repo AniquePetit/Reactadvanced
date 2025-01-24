@@ -13,7 +13,7 @@ const CustomButton = ({ to, colorScheme, children }) => {
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [categories, setCategories] = useState([]);  
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ const EventsPage = () => {
         return response.json();
       })
       .then((data) => {
-        setCategories(data);  
+        setCategories(data);
       })
       .catch((err) => setError('Fout bij het ophalen van categorieën'))
       .finally(() => setLoading(false));
@@ -45,8 +45,8 @@ const EventsPage = () => {
         return response.json();
       })
       .then((data) => {
-        setEvents(data);  
-        setFilteredEvents(data);  
+        setEvents(data);
+        setFilteredEvents(data);
       })
       .catch((err) => setError('Er is iets mis gegaan bij het ophalen van evenementen'))
       .finally(() => setLoading(false));
@@ -71,18 +71,24 @@ const EventsPage = () => {
             const category = categories.find((cat) => cat.id === categoryId);
             return category ? category.name : null;
           })
-          .filter(Boolean)  // Verwijder null waarden
-      : [];
+          .filter(Boolean)
+      : ['Onbekend'];
   };
 
   if (loading) {
     return <Spinner size="xl" />;
   }
 
+  if (error) {
+    return (
+      <Text color="red.500" mt="4">
+        {error}
+      </Text>
+    );
+  }
+
   return (
     <Box p="4">
-      {error && <Text color="red.500">{error}</Text>}
-
       {/* Zoekveld */}
       <Input
         placeholder="Zoek evenementen"
@@ -116,7 +122,7 @@ const EventsPage = () => {
           filteredEvents.map((event) => (
             <Box key={event.id} p="4" borderWidth="1px" borderRadius="lg">
               <Image
-                src={event.image || '/images/default-placeholder.jpg'}  
+                src={event.image ? event.image : '/images/default-placeholder.jpg'}
                 alt={event.title}
                 boxSize="200px"
                 objectFit="cover"
@@ -125,7 +131,7 @@ const EventsPage = () => {
               <Text fontWeight="bold" mb="2">{event.title}</Text>
               <Text>{event.description}</Text>
               <Text mt="2">
-                <strong>Categories:</strong> {getCategoryNames(event.categoryIds).join(', ')} 
+                <strong>Categories:</strong> {getCategoryNames(event.categoryIds).join(', ')}
               </Text>
               <CustomButton to={`/event/${event.id}`} colorScheme="teal">
                 Meer details

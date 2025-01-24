@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Heading, Text, Image, Spinner } from '@chakra-ui/react';
+import { Box, Button, Heading, Text, Image, Spinner, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const EventPage = () => {
@@ -9,6 +9,7 @@ const EventPage = () => {
   const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,12 +62,32 @@ const EventPage = () => {
       .filter(Boolean);
   };
 
+  const handleDelete = () => {
+    // We open de modal voor bevestiging
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await fetch(`http://localhost:3000/events/${event.id}`, {
+        method: 'DELETE',
+      });
+      navigate('/');
+    } catch (err) {
+      console.error('Error bij verwijderen:', err);
+    }
+  };
+
   if (loading) {
     return <Spinner size="xl" />;
   }
 
   if (error) {
-    return <Text color="red.500">{error}</Text>;
+    return (
+      <Text color="red.500" mt="4">
+        {error}
+      </Text>
+    );
   }
 
   if (!event) {
@@ -86,7 +107,7 @@ const EventPage = () => {
         <strong>End Time:</strong> {parseDate(event.endTime)}
       </Text>
       <Image
-        src={event.image || '/images/default-placeholder.jpg'}
+        src={event.image ? event.image : '/images/default-placeholder.jpg'}
         alt={event.title || 'Evenement afbeelding'}
         boxSize="300px"
         objectFit="cover"
@@ -101,6 +122,29 @@ const EventPage = () => {
       <Button colorScheme="blue" onClick={() => navigate(`/edit-event/${event.id}`)}>
         Bewerken
       </Button>
+      <Button colorScheme="red" ml={2} onClick={handleDelete}>
+        Verwijderen
+      </Button>
+
+      {/* Modal voor bevestiging van verwijdering */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Verwijder evenement</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            Weet je zeker dat je dit evenement wilt verwijderen?
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
+              Annuleren
+            </Button>
+            <Button colorScheme="red" ml={3} onClick={confirmDelete}>
+              Verwijderen
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };

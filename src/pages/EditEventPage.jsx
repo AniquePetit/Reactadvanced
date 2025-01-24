@@ -35,7 +35,7 @@ const EditEventPage = () => {
           setDescription(data.description);
           setStartTime(data.startTime);
           setEndTime(data.endTime);
-          setImage(data.image || 'https://via.placeholder.com/300'); // Fallback URL voor afbeeldingen
+          setImage(data.image || 'https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'); // Fallback URL voor afbeeldingen
           setCategories(data.categories || []);
           if (data.creator && typeof data.creator === "object") {
             setCreator(data.creator.name);

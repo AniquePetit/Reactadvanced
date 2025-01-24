@@ -44,6 +44,36 @@
       "categoryIds": [
         "1"
       ]
+    },
+    {
+      "id": "0c99",
+      "title": "griots",
+      "description": "festival",
+      "startTime": "2025-06-26T10:40",
+      "endTime": "2025-06-27T15:41",
+      "categoryId": 3,
+      "image": "blob:http://localhost:5173/cdfeab52-8c1d-4808-ac7b-1038a7478650",
+      "createdBy": 1
+    },
+    {
+      "title": "test",
+      "description": "test",
+      "startTime": "2025-01-31T10:44",
+      "endTime": "2025-02-01T10:44",
+      "image": "https://via.placeholder.com/300",
+      "categories": [],
+      "creator": "test",
+      "id": "dd68"
+    },
+    {
+      "id": "25c5",
+      "title": "test",
+      "description": "test",
+      "startTime": "2025-03-10T10:00",
+      "endTime": "2025-01-22T11:59",
+      "categoryId": 2,
+      "image": null,
+      "createdBy": 1
     }
   ],
   "categories": [
