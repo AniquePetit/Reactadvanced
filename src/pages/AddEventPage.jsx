@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, FormControl, FormLabel, Input, Textarea, useToast } from '@chakra-ui/react';
+import { Box, Button, Input, Textarea, FormControl, FormLabel, Select, useToast } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 
 const AddEventPage = () => {
@@ -7,7 +7,7 @@ const AddEventPage = () => {
   const [description, setDescription] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [categoryIds, setCategoryIds] = useState([]);
+  const [category, setCategory] = useState(''); // Single category
   const [image, setImage] = useState('');
   const [categories, setCategories] = useState([]);
   const toast = useToast();
@@ -45,7 +45,7 @@ const AddEventPage = () => {
       description,
       startTime,
       endTime,
-      categoryIds,
+      category,
       image,
     };
 
@@ -64,7 +64,6 @@ const AddEventPage = () => {
 
       const createdEvent = await response.json();
 
-     
       toast({
         title: 'Evenement aangemaakt!',
         description: `Het evenement "${createdEvent.title}" is succesvol aangemaakt.`,
@@ -73,7 +72,6 @@ const AddEventPage = () => {
         isClosable: true,
       });
 
-     
       navigate(`/event/${createdEvent.id}`);
     } catch (error) {
       toast({
@@ -89,54 +87,60 @@ const AddEventPage = () => {
   return (
     <Box p="4">
       <form onSubmit={handleSubmit}>
-        <FormControl mb="4">
-          <FormLabel>Title</FormLabel>
+        <FormControl mb="4" isRequired>
+          <FormLabel>Titel</FormLabel>
           <Input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            required
+            placeholder="Titel van het evenement"
           />
         </FormControl>
 
         <FormControl mb="4">
-          <FormLabel>Description</FormLabel>
+          <FormLabel>Beschrijving</FormLabel>
           <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
+            placeholder="Beschrijving van het evenement"
           />
         </FormControl>
 
-        <FormControl mb="4">
-          <FormLabel>Start Time</FormLabel>
+        <FormControl mb="4" isRequired>
+          <FormLabel>Starttijd</FormLabel>
           <Input
             type="datetime-local"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
-            required
           />
         </FormControl>
 
-        <FormControl mb="4">
-          <FormLabel>End Time</FormLabel>
+        <FormControl mb="4" isRequired>
+          <FormLabel>Eindtijd</FormLabel>
           <Input
             type="datetime-local"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
-            required
           />
         </FormControl>
 
         <FormControl mb="4">
-          <FormLabel>Categories</FormLabel>
-          <select
-            multiple
-            value={categoryIds}
-            onChange={(e) =>
-              setCategoryIds(Array.from(e.target.selectedOptions, (option) => option.value))
-            }
-            required
+          <FormLabel>Afbeelding URL</FormLabel>
+          <Input
+            type="text"
+            value={image}
+            onChange={(e) => setImage(e.target.value)}
+            placeholder="URL van de afbeelding"
+          />
+        </FormControl>
+
+        <FormControl mb="4" isRequired>
+          <FormLabel>Categorie</FormLabel>
+          <Select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="Selecteer een categorie"
+            isRequired
           >
             {categories.length > 0 ? (
               categories.map((category) => (
@@ -147,20 +151,11 @@ const AddEventPage = () => {
             ) : (
               <option value="">Geen categorieën beschikbaar</option>
             )}
-          </select>
-        </FormControl>
-
-        <FormControl mb="4">
-          <FormLabel>Image URL</FormLabel>
-          <Input
-            type="text"
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-          />
+          </Select>
         </FormControl>
 
         <Button colorScheme="blue" type="submit">
-          Create Event
+          Maak Evenement Aan
         </Button>
       </form>
     </Box>
