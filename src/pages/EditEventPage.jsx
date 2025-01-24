@@ -216,7 +216,7 @@ const EditEventPage = () => {
 
       {event && (
         <Box mt={5}>
-          <img src={event.image || 'https://via.placeholder.com/300'} alt={event.title} style={{ maxWidth: '100%' }} />
+          <img src={event.image || 'https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'} alt={event.title} style={{ maxWidth: '100%' }} />
         </Box>
       )}
     </Box>
