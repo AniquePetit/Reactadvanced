@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Heading, Text, Image, Spinner, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton } from '@chakra-ui/react';
+import { Box, Button, Heading, Text, Image, Spinner, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, useToast } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const EventPage = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [event, setEvent] = useState(null);
   const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,10 +26,7 @@ const EventPage = () => {
           throw new Error('Fout bij het ophalen van gegevens');
         }
 
-        const [eventData, categoriesData] = await Promise.all([
-          eventsResponse.json(),
-          categoriesResponse.json(),
-        ]);
+        const [eventData, categoriesData] = await Promise.all([eventsResponse.json(), categoriesResponse.json()]);
 
         if (!eventData) {
           throw new Error('Geen evenement gevonden met dit ID.');
@@ -63,7 +61,7 @@ const EventPage = () => {
   };
 
   const handleDelete = () => {
-    setIsModalOpen(true); // Open the confirmation modal
+    setIsModalOpen(true);
   };
 
   const confirmDelete = async () => {
@@ -71,9 +69,24 @@ const EventPage = () => {
       await fetch(`http://localhost:3000/events/${event.id}`, {
         method: 'DELETE',
       });
-      navigate('/'); // Redirect to the main events page after deleting
+
+      toast({
+        title: 'Evenement verwijderd.',
+        description: 'Het evenement is succesvol verwijderd.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+
+      navigate('/');
     } catch (err) {
-      console.error('Error bij verwijderen:', err);
+      toast({
+        title: 'Fout bij verwijderen.',
+        description: 'Er is een fout opgetreden bij het verwijderen van het evenement.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
@@ -90,7 +103,7 @@ const EventPage = () => {
   }
 
   if (!event) {
-    return <Text color="orange.500">Evenement niet gevonden. Controleer het ID en probeer het opnieuw.</Text>;
+    return <Text color="orange.500">Evenement niet gevonden.</Text>;
   }
 
   const eventCategories = getCategoryNames(event.categoryIds);
@@ -106,7 +119,7 @@ const EventPage = () => {
         <strong>End Time:</strong> {parseDate(event.endTime)}
       </Text>
       <Image
-        src={event.image ? event.image : 'https://png.pngtree.com/png-vector/20210604/ourmid/pngtree-gray-network-placeholder-png-image_3416659.jpg'}
+        src={event.image || 'https://png.pngtree.com/png-vector/20210604/ourmid/pngtree-gray-network-placeholder-png-image_3416659.jpg'}
         alt={event.title || 'Evenement afbeelding'}
         boxSize="300px"
         objectFit="cover"
@@ -115,9 +128,6 @@ const EventPage = () => {
       <Text mb={2}>
         <strong>Categories:</strong> {eventCategories.join(', ')}
       </Text>
-      <Text mb={2}>
-        <strong>Creator:</strong> {event.creator}
-      </Text>
       <Button colorScheme="blue" onClick={() => navigate(`/edit-event/${event.id}`)}>
         Bewerken
       </Button>
@@ -125,21 +135,21 @@ const EventPage = () => {
         Verwijderen
       </Button>
 
-      {/* Modal voor bevestiging van verwijdering */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Verwijder evenement</ModalHeader>
+          <ModalHeader>Weet je zeker dat je dit evenement wilt verwijderen?</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            Weet je zeker dat je dit evenement wilt verwijderen?
+            Dit kan niet ongedaan worden gemaakt.
           </ModalBody>
+
           <ModalFooter>
-            <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
-              Annuleren
-            </Button>
-            <Button colorScheme="red" ml={3} onClick={confirmDelete}>
+            <Button colorScheme="red" mr={3} onClick={confirmDelete}>
               Verwijderen
+            </Button>
+            <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
+              Annuleren
             </Button>
           </ModalFooter>
         </ModalContent>

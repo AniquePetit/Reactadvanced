@@ -6,23 +6,21 @@ const Navigation = () => {
   return (
     <Box p="4" bg="teal.600">
       <Flex justify="space-between" align="center">
-        {/* Link naar de homepagina */}
+       
         <Button as={Link} to="/" color="black" fontSize="xl" fontWeight="bold" _hover={{ bg: 'teal.700' }}>
           Home
         </Button>
 
-        {/* Links naar de Add Event pagina */}
         <Flex>
           <Button 
             as={Link} 
             to="/add-event" 
             color="black" 
             _hover={{ bg: 'teal.700' }} 
-            mr={4
-          }>
+            mr={4}  
+          >
             Add Event
           </Button>
-        
         </Flex>
       </Flex>
     </Box>

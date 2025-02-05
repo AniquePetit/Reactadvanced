@@ -22,42 +22,42 @@ const EventsPage = () => {
   useEffect(() => {
     setLoading(true);
 
+    // Ophalen van de categorieën
     fetch('http://localhost:3000/categories')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Fout bij het ophalen van categorieën');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setCategories(data);
-      })
-      .catch((err) => setError('Fout bij het ophalen van categorieën'))
+      .then((response) => response.ok ? response.json() : Promise.reject('Fout bij ophalen categorieën'))
+      .then((data) => setCategories(data))
+      .catch((err) => setError(err))
       .finally(() => setLoading(false));
 
+    // Ophalen van de evenementen
     fetch('http://localhost:3000/events')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Er is iets mis gegaan bij het ophalen van evenementen');
-        }
-        return response.json();
-      })
+      .then((response) => response.ok ? response.json() : Promise.reject('Fout bij ophalen evenementen'))
       .then((data) => {
         setEvents(data);
-        setFilteredEvents(data);
+        setFilteredEvents(data); // Initiële lijst van evenementen
       })
-      .catch((err) => setError('Er is iets mis gegaan bij het ophalen van evenementen'))
+      .catch((err) => setError(err))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     if (loading) return;
 
-    let filtered = events.filter(event => {
-      const matchesSearch = event.title.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = selectedCategory === '' || event.categoryIds.includes(parseInt(selectedCategory));
-      return matchesSearch && matchesCategory;
-    });
+    let filtered = events;
+
+    // Filteren op zoekterm
+    if (search) {
+      filtered = filtered.filter((event) =>
+        event.title.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    // Filteren op geselecteerde categorie, maar alleen als er een categorie is geselecteerd
+    if (selectedCategory && selectedCategory !== '') {
+      filtered = filtered.filter((event) =>
+        event.categoryIds.includes(parseInt(selectedCategory)) // Vergelijk ID's van categorieën
+      );
+    }
 
     setFilteredEvents(filtered);
   }, [events, search, selectedCategory, loading]);
@@ -102,15 +102,12 @@ const EventsPage = () => {
         onChange={(e) => setSelectedCategory(e.target.value)}
         mb="4"
       >
-        {categories.length > 0 ? (
-          categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))
-        ) : (
-          <option value="">Geen categorieën beschikbaar</option>
-        )}
+        <option value="">Alle categorieën</option>
+        {categories.map((category) => (
+          <option key={category.id} value={category.id}>
+            {category.name}
+          </option>
+        ))}
       </Select>
 
       <Box display="grid" gridTemplateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap="4">
@@ -120,7 +117,7 @@ const EventsPage = () => {
           filteredEvents.map((event) => (
             <Box key={event.id} p="4" borderWidth="1px" borderRadius="lg">
               <Image
-                src={event.image ? event.image : 'https://png.pngtree.com/png-vector/20210604/ourmid/pngtree-gray-network-placeholder-png-image_3416659.jpg'}
+                src={event.image ? event.image : 'https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'}
                 alt={event.title}
                 boxSize="200px"
                 objectFit="cover"
@@ -129,7 +126,7 @@ const EventsPage = () => {
               <Text fontWeight="bold" mb="2">{event.title}</Text>
               <Text>{event.description}</Text>
               <Text mt="2">
-                <strong>Categories:</strong> {getCategoryNames(event.categoryIds).join(', ')}
+                <strong>Categorieën:</strong> {getCategoryNames(event.categoryIds).join(', ')}
               </Text>
               <CustomButton to={`/event/${event.id}`} colorScheme="teal">
                 Meer details

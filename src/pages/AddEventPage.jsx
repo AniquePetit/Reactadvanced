@@ -1,93 +1,113 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Input, Textarea, FormControl, FormLabel, Select, useToast } from '@chakra-ui/react';
+import { Box, Button, Input, Textarea, FormControl, FormLabel, Select, Spinner, useToast } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 
 const AddEventPage = () => {
+  const navigate = useNavigate();
+  const toast = useToast();
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [category, setCategory] = useState(''); // Single category
   const [image, setImage] = useState('');
-  const [categories, setCategories] = useState([]);
-  const toast = useToast();
-  const navigate = useNavigate();
+  const [categoryIds, setCategoryIds] = useState([]);
+  const [creator, setCreator] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [allCategories, setAllCategories] = useState([]);
 
-  // Ophalen van categorieën bij het laden van de pagina
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/categories');
-        if (!response.ok) {
-          throw new Error('Fout bij het ophalen van categorieën');
-        }
-        const data = await response.json();
-        setCategories(data);
-      } catch (error) {
-        toast({
-          title: 'Fout bij ophalen categorieën.',
-          description: error.message,
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-    };
+    setLoading(true);
 
-    fetchCategories();
-  }, [toast]);
+    fetch('http://localhost:3000/categories')
+      .then((response) => response.json())
+      .then((categoriesData) => {
+        setAllCategories(categoriesData); 
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+        setErrorMessage("Er is iets mis gegaan bij het ophalen van de categorieën.");
+        setLoading(false);
+      });
+  }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    const newEvent = {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    // Controleer of de eindtijd na de starttijd komt
+    if (end <= start) {
+      setErrorMessage('De eindtijd moet na de starttijd liggen.');
+      return;
+    }
+
+    // Controleer of verplichte velden zijn ingevuld, inclusief categorie
+    if (!title || !startTime || !endTime || !creator || categoryIds.length === 0 || categoryIds[0] === '') {
+      setErrorMessage('Titel, starttijd, eindtijd, creator en categorieën zijn verplicht.');
+      return;
+    }
+
+    const eventData = {
       title,
       description,
       startTime,
       endTime,
-      category,
       image,
+      categoryIds, 
+      creator,
     };
 
-    try {
-      const response = await fetch('http://localhost:3000/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newEvent),
+    // Verzenden van evenement naar de server
+    fetch('http://localhost:3000/events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData),
+    })
+      .then((response) => response.json())
+      .then(() => {
+        toast({
+          title: 'Nieuw evenement toegevoegd',
+          description: 'Het evenement is succesvol toegevoegd.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        navigate('/');
+      })
+      .catch((error) => {
+        console.error('Fout bij het toevoegen van het evenement:', error);
+        setErrorMessage('Er is iets mis gegaan bij het toevoegen van het evenement.');
       });
-
-      if (!response.ok) {
-        throw new Error('Er is een probleem opgetreden bij het aanmaken van het evenement.');
-      }
-
-      const createdEvent = await response.json();
-
-      toast({
-        title: 'Evenement aangemaakt!',
-        description: `Het evenement "${createdEvent.title}" is succesvol aangemaakt.`,
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
-
-      navigate(`/event/${createdEvent.id}`);
-    } catch (error) {
-      toast({
-        title: 'Fout bij het aanmaken van evenement.',
-        description: error.message,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    }
   };
 
+  const resetForm = () => {
+    setTitle('');
+    setDescription('');
+    setStartTime('');
+    setEndTime('');
+    setImage('');
+    setCategoryIds([]); // Reset categoryIds
+    setCreator('');
+    setErrorMessage('');
+  };
+
+  if (loading) {
+    return <Spinner size="xl" />;
+  }
+
   return (
-    <Box p="4">
+    <Box p={5}>
+      <h1>Nieuw Evenement Toevoegen</h1>
+      {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
+
       <form onSubmit={handleSubmit}>
-        <FormControl mb="4" isRequired>
+        <FormControl mb={4} isRequired>
           <FormLabel>Titel</FormLabel>
           <Input
             type="text"
@@ -97,7 +117,7 @@ const AddEventPage = () => {
           />
         </FormControl>
 
-        <FormControl mb="4">
+        <FormControl mb={4}>
           <FormLabel>Beschrijving</FormLabel>
           <Textarea
             value={description}
@@ -106,7 +126,7 @@ const AddEventPage = () => {
           />
         </FormControl>
 
-        <FormControl mb="4" isRequired>
+        <FormControl mb={4} isRequired>
           <FormLabel>Starttijd</FormLabel>
           <Input
             type="datetime-local"
@@ -115,7 +135,7 @@ const AddEventPage = () => {
           />
         </FormControl>
 
-        <FormControl mb="4" isRequired>
+        <FormControl mb={4} isRequired>
           <FormLabel>Eindtijd</FormLabel>
           <Input
             type="datetime-local"
@@ -124,7 +144,7 @@ const AddEventPage = () => {
           />
         </FormControl>
 
-        <FormControl mb="4">
+        <FormControl mb={4}>
           <FormLabel>Afbeelding URL</FormLabel>
           <Input
             type="text"
@@ -134,28 +154,36 @@ const AddEventPage = () => {
           />
         </FormControl>
 
-        <FormControl mb="4" isRequired>
-          <FormLabel>Categorie</FormLabel>
+        <FormControl mb={4} isRequired>
+          <FormLabel>Kies een categorie</FormLabel>
           <Select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="Selecteer een categorie"
-            isRequired
+            value={categoryIds[0] || ''} // Only allow one category to be selected
+            onChange={(e) => setCategoryIds([e.target.value])} // Ensure it's an array with one value
           >
-            {categories.length > 0 ? (
-              categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))
-            ) : (
-              <option value="">Geen categorieën beschikbaar</option>
-            )}
+            <option value="">Selecteer een categorie...</option> {/* Lege optie toevoegen */}
+            {allCategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
           </Select>
         </FormControl>
 
-        <Button colorScheme="blue" type="submit">
-          Maak Evenement Aan
+        <FormControl mb={4} isRequired>
+          <FormLabel>Creator</FormLabel>
+          <Input
+            type="text"
+            value={creator}
+            onChange={(e) => setCreator(e.target.value)}
+            placeholder="Naam van de maker"
+          />
+        </FormControl>
+
+        <Button type="submit" colorScheme="teal" mt={4}>
+          Voeg Evenement Toe
+        </Button>
+        <Button type="button" colorScheme="gray" mt={4} ml={4} onClick={resetForm}>
+          Reset
         </Button>
       </form>
     </Box>
