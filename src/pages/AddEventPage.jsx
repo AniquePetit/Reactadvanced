@@ -51,13 +51,16 @@ const AddEventPage = () => {
       return;
     }
 
+    // Zet de categoryIds om naar getallen
+    const numericCategoryIds = categoryIds.map((categoryId) => Number(categoryId));
+
     const eventData = {
       title,
       description,
       startTime,
       endTime,
       image,
-      categoryIds, 
+      categoryIds: numericCategoryIds, // Gebruik de genummerde categoryIds
       creator,
     };
 
