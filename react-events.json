@@ -64,28 +64,52 @@
       "location": "Shavasana Yoga School",
       "startTime": "2023-03-09T06:00:00.000Z",
       "endTime": "2023-03-09T07:00:00.000Z"
+    },
+    {
+      "id": "6b58",
+      "title": "test",
+      "description": "test",
+      "startTime": "2025-05-10T10:00",
+      "endTime": "2025-05-10T11:00",
+      "image": "",
+      "categoryIds": [
+        4
+      ],
+      "creator": "artist"
+    },
+    {
+      "title": "festival",
+      "description": "test",
+      "startTime": "2025-07-01T09:00",
+      "endTime": "2025-07-01T21:00",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg",
+      "categoryIds": [
+        5
+      ],
+      "creator": "musican",
+      "id": "7b77"
     }
   ],
   "categories": [
     {
       "name": "sports",
-      "id": 1
+      "id": "1"
     },
     {
       "name": "games",
-      "id": 2
+      "id": "2"
     },
     {
       "name": "relaxation",
-      "id": 3
+      "id": "3"
     },
     {
       "name": "art",
-      "id": 4
+      "id": "4"
     },
     {
       "name": "music",
-      "id": 5
+      "id": "5"
     }
   ]
 }
