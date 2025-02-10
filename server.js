@@ -4,12 +4,10 @@ import fs from 'fs';
 import path from 'path';
 
 const app = express();
-const PORT = 5000;
-
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
-
 
 const readJsonFile = (filePath) => {
   try {
@@ -25,7 +23,6 @@ const readJsonFile = (filePath) => {
   }
 };
 
-
 app.get('/api/events', (req, res) => {
   const filePath = path.join(__dirname, 'src', 'data', 'events.json');
   const eventsData = readJsonFile(filePath);
@@ -36,7 +33,6 @@ app.get('/api/events', (req, res) => {
     res.status(500).json({ error: 'Could not load events data.' });
   }
 });
-
 
 app.get('/api/events/:id', (req, res) => {
   const { id } = req.params;
@@ -55,7 +51,6 @@ app.get('/api/events/:id', (req, res) => {
   }
 });
 
-
 app.get('/api/categories', (req, res) => {
   const filePath = path.join(__dirname, 'src', 'data', 'categories.json');
   const categoriesData = readJsonFile(filePath);
@@ -66,7 +61,6 @@ app.get('/api/categories', (req, res) => {
     res.status(500).json({ error: 'Could not load categories data.' });
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
