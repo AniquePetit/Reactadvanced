@@ -2,13 +2,19 @@ import express from 'express';
 import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Fix voor __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(cors());
 app.use(express.json());
 
+// Functie om JSON-bestanden te lezen
 const readJsonFile = (filePath) => {
   try {
     const stats = fs.statSync(filePath);
@@ -23,8 +29,9 @@ const readJsonFile = (filePath) => {
   }
 };
 
+// Endpoint voor events
 app.get('/api/events', (req, res) => {
-  const filePath = path.join(__dirname, 'src', 'data', 'events.json');
+  const filePath = path.join(__dirname, 'data', 'events.json'); // Correct pad voor lokale bestanden in de 'data' map
   const eventsData = readJsonFile(filePath);
 
   if (eventsData) {
@@ -34,9 +41,10 @@ app.get('/api/events', (req, res) => {
   }
 });
 
+// Endpoint voor een specifiek event
 app.get('/api/events/:id', (req, res) => {
   const { id } = req.params;
-  const filePath = path.join(__dirname, 'src', 'data', 'events.json');
+  const filePath = path.join(__dirname, 'data', 'events.json');
   const eventsData = readJsonFile(filePath);
 
   if (eventsData) {
@@ -51,8 +59,9 @@ app.get('/api/events/:id', (req, res) => {
   }
 });
 
+// Endpoint voor categorieën
 app.get('/api/categories', (req, res) => {
-  const filePath = path.join(__dirname, 'src', 'data', 'categories.json');
+  const filePath = path.join(__dirname, 'data', 'categories.json');
   const categoriesData = readJsonFile(filePath);
 
   if (categoriesData) {
@@ -62,6 +71,7 @@ app.get('/api/categories', (req, res) => {
   }
 });
 
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`✅ Server is running on http://localhost:${PORT}`);
 });

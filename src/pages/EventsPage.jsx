@@ -23,14 +23,14 @@ const EventsPage = () => {
     setLoading(true);
 
     // Ophalen van de categorieën
-    fetch('https://tidal-vagabond-squid.glitch.me/api/categories')  // Aangepast naar Glitch URL
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/categories`)  // Aangepast naar omgevingsvariabele
       .then((response) => response.ok ? response.json() : Promise.reject('Fout bij ophalen categorieën'))
       .then((data) => setCategories(data))
       .catch((err) => setError(err))
       .finally(() => setLoading(false));
 
     // Ophalen van de evenementen
-    fetch('https://tidal-vagabond-squid.glitch.me/api/events')  // Aangepast naar Glitch URL
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/events`)  // Aangepast naar omgevingsvariabele
       .then((response) => response.ok ? response.json() : Promise.reject('Fout bij ophalen evenementen'))
       .then((data) => {
         setEvents(data);

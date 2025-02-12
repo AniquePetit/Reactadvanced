@@ -20,7 +20,7 @@ const AddEventPage = () => {
   useEffect(() => {
     setLoading(true);
 
-    fetch('http://localhost:3000/categories')
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/categories`)
       .then((response) => response.json())
       .then((categoriesData) => {
         setAllCategories(categoriesData); 
@@ -65,7 +65,7 @@ const AddEventPage = () => {
     };
 
     // Verzenden van evenement naar de server
-    fetch('http://localhost:3000/events', {
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/events`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

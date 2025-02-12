@@ -24,8 +24,8 @@ const EditEventPage = () => {
 
       // Haal het evenement en de categorieën op via API calls
       Promise.all([
-        fetch(`http://localhost:3000/events/${eventId}`), // Event ophalen op basis van eventId
-        fetch('http://localhost:3000/categories'), // Categorieën ophalen
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/events/${eventId}`), // Event ophalen op basis van eventId
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/categories`), // Categorieën ophalen
       ])
         .then(([eventResponse, categoriesResponse]) => {
           if (!eventResponse.ok || !categoriesResponse.ok) {
@@ -79,7 +79,7 @@ const EditEventPage = () => {
     };
 
     // Bepaal de URL en het HTTP-methode voor de POST of PUT
-    const url = eventId ? `http://localhost:3000/events/${eventId}` : 'http://localhost:3000/events';
+    const url = eventId ? `${process.env.REACT_APP_API_BASE_URL}/events/${eventId}` : `${process.env.REACT_APP_API_BASE_URL}/events`;
     const method = eventId ? 'PUT' : 'POST';
 
     // Verstuur de data naar de server
