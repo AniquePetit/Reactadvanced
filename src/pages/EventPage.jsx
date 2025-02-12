@@ -18,8 +18,8 @@ const EventPage = () => {
         setLoading(true);
 
         const [eventsResponse, categoriesResponse] = await Promise.all([
-          fetch(`${process.env.REACT_APP_API_BASE_URL}/events/${eventId}`),  // Veranderde URL naar Glitch
-          fetch(`${process.env.REACT_APP_API_BASE_URL}/categories`),  // Veranderde URL naar Glitch
+          fetch(`https://tidal-vagabond-squid.glitch.me/api/events/${eventId}`),  // Glitch API URL voor evenement ophalen
+          fetch(`https://tidal-vagabond-squid.glitch.me/api/categories`),  // Glitch API URL voor categorieën ophalen
         ]);
 
         if (!eventsResponse.ok || !categoriesResponse.ok) {
@@ -66,7 +66,7 @@ const EventPage = () => {
 
   const confirmDelete = async () => {
     try {
-      await fetch(`${process.env.REACT_APP_API_BASE_URL}/events/${event.id}`, {
+      await fetch(`https://tidal-vagabond-squid.glitch.me/api/events/${event.id}`, {
         method: 'DELETE',
       });
 

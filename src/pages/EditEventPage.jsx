@@ -22,10 +22,10 @@ const EditEventPage = () => {
     if (eventId) {
       setLoading(true);
 
-      // Haal het evenement en de categorieën op via API calls
+      // Haal het evenement en de categorieën op via API calls naar de Glitch URL
       Promise.all([
-        fetch(`${process.env.REACT_APP_API_BASE_URL}/events/${eventId}`), // Event ophalen op basis van eventId
-        fetch(`${process.env.REACT_APP_API_BASE_URL}/categories`), // Categorieën ophalen
+        fetch(`https://tidal-vagabond-squid.glitch.me/api/events/${eventId}`), // Event ophalen op basis van eventId
+        fetch(`https://tidal-vagabond-squid.glitch.me/api/categories`), // Categorieën ophalen
       ])
         .then(([eventResponse, categoriesResponse]) => {
           if (!eventResponse.ok || !categoriesResponse.ok) {
@@ -79,7 +79,7 @@ const EditEventPage = () => {
     };
 
     // Bepaal de URL en het HTTP-methode voor de POST of PUT
-    const url = eventId ? `${process.env.REACT_APP_API_BASE_URL}/events/${eventId}` : `${process.env.REACT_APP_API_BASE_URL}/events`;
+    const url = eventId ? `https://tidal-vagabond-squid.glitch.me/api/events/${eventId}` : `https://tidal-vagabond-squid.glitch.me/api/events`; // Glitch API URL
     const method = eventId ? 'PUT' : 'POST';
 
     // Verstuur de data naar de server

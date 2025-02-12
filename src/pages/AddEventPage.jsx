@@ -20,7 +20,7 @@ const AddEventPage = () => {
   useEffect(() => {
     setLoading(true);
 
-    fetch(`${process.env.REACT_APP_API_BASE_URL}/categories`)
+    fetch('https://tidal-vagabond-squid.glitch.me/api/categories')  // Glitch API URL
       .then((response) => response.json())
       .then((categoriesData) => {
         setAllCategories(categoriesData); 
@@ -65,7 +65,7 @@ const AddEventPage = () => {
     };
 
     // Verzenden van evenement naar de server
-    fetch(`${process.env.REACT_APP_API_BASE_URL}/events`, {
+    fetch('https://tidal-vagabond-squid.glitch.me/api/events', {  // Glitch API URL
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
